@@ -20,11 +20,12 @@ class CCY extends Cryptocurrency {
     fractNum: number;
     digits: number;
 
-    constructor(crypto: object, intNum: number, fractNum: number, digits: number = 8) {
+    constructor(crypto: object, num: number | string) {
         super(crypto);
-        this.intNum = intNum
-        this.fractNum = fractNum
-        this.digits = digits
+        let separator = typeof num === 'number' ? '.' : ','
+        this.intNum = parseInt((num.toString().split(separator)[0]))
+        this.fractNum = parseInt((num.toString().split(separator)[1]))
+        this.digits = (num.toString().split(separator)[1]).length
     }
 
     getIntNum () : number {
@@ -36,9 +37,11 @@ class CCY extends Cryptocurrency {
     getDigits () : number {
         return this.digits
     }
-    // todo: get full value
     getValue () : number {
-        return this.intNum
+        return Number(`${this.intNum}.${this.fractNum}`)
+    }
+    getBalance () : string {
+        return `${this.intNum}.${this.fractNum} ${this.getCode()}`
     }
     plusValue (value: number) : number {
         this.intNum += value
@@ -71,8 +74,17 @@ let testCrypto = {
     code: 'PLZM'
 }
 
-const tmp = new CCY(testCrypto, 150, 99, 3) // 150.990
+const tmp = new CCY(testCrypto, 150.346)
+const tmp2 = new CCY(testCrypto, '150,346')
 
+console.log('number')
 console.log(tmp.getIntNum())
-console.log(tmp.plusValue(1))
-console.log(tmp.getIntNum())
+console.log(tmp.getFractNum())
+console.log(tmp.getDigits())
+console.log(tmp.getValue())
+console.log(tmp.getBalance())
+console.log('string')
+console.log(tmp2.getIntNum())
+console.log(tmp2.getFractNum())
+console.log(tmp2.getValue())
+console.log(tmp2.getBalance())
