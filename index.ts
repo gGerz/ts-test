@@ -22,10 +22,7 @@ class CCY extends Cryptocurrency {
 
     constructor(crypto: object, num: number | string) {
         super(crypto);
-        let separator = typeof num === 'number' ? '.' : ','
-        this.intNum = parseInt((num.toString().split(separator)[0]))
-        this.fractNum = parseInt((num.toString().split(separator)[1]))
-        this.digits = (num.toString().split(separator)[1]).length
+        this.setValue(num)
     }
 
     getIntNum () : number {
@@ -37,28 +34,52 @@ class CCY extends Cryptocurrency {
     getDigits () : number {
         return this.digits
     }
+    setValue (num: number | string) : void {
+        let separator = typeof num === 'number' ? '.' : ','
+        this.intNum = parseInt((num.toString().split(separator)[0]))
+        this.fractNum = parseInt((num.toString().split(separator)[1]))
+        this.digits = (num.toString().split(separator)[1]).length
+    }
     getValue () : number {
         return Number(`${this.intNum}.${this.fractNum}`)
     }
     getBalance () : string {
         return `${this.intNum}.${this.fractNum} ${this.getCode()}`
     }
+    getPercent (percent: number, setting: string = 'full' ) : number {
+        switch (setting) {
+            case 'full' : {
+                return this.getValue() * percent / 100
+            }
+            case 'int' : {
+                return this.getIntNum() * percent / 100
+            }
+            case 'fract': {
+                let parsedFractNum = this.getValue() - this.getIntNum() // .999 -> 0.999
+                return parsedFractNum * percent / 100
+            }
+        }
+    }
     plusValue (value: number) : number {
-        this.intNum += value
-        return this.intNum
+        let oldValue = this.getValue()
+        let newValue = oldValue + value
+        this.setValue(newValue)
+        return newValue
     }
     minusValue (value: number) : number {
-        this.intNum -= value
-        return this.intNum
+        let oldValue = this.getValue()
+        let newValue = oldValue - value
+        this.setValue(newValue)
+        return newValue
     }
     isMoreThen(value: number) : boolean {
-        return this.intNum > value
+        return this.getValue() > value
     }
     isLessThen(value: number) : boolean {
-        return this.intNum < value
+        return this.getValue() < value
     }
     isEqually (value: number) : boolean {
-        return this.intNum === value
+        return this.getValue() === value
     }
     // todo ChangeValues
     changeValues (from: number, to: number ): void {
@@ -68,23 +89,17 @@ class CCY extends Cryptocurrency {
 
 }
 
-
 let testCrypto = {
     name: 'PLAZMA',
     code: 'PLZM'
 }
 
 const tmp = new CCY(testCrypto, 150.346)
-const tmp2 = new CCY(testCrypto, '150,346')
-
-console.log('number')
 console.log(tmp.getIntNum())
 console.log(tmp.getFractNum())
 console.log(tmp.getDigits())
 console.log(tmp.getValue())
 console.log(tmp.getBalance())
-console.log('string')
-console.log(tmp2.getIntNum())
-console.log(tmp2.getFractNum())
-console.log(tmp2.getValue())
-console.log(tmp2.getBalance())
+console.log(tmp.plusValue(44.27))
+console.log(tmp.getBalance())
+console.log(tmp.getPercent(10, 'fract'), '%')
