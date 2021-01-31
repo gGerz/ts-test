@@ -1,9 +1,13 @@
-class Cryptocurrency {
+interface ICrypto {
     code: string;
     name: string;
+}
 
-    // todo: убрать 'any'
-    constructor(crypto: any) {
+class Cryptocurrency {
+    private readonly code: string;
+    private readonly name: string;
+
+    constructor(crypto: ICrypto) {
         this.code = crypto.code
         this.name = crypto.name
     }
@@ -16,11 +20,11 @@ class Cryptocurrency {
 }
 
 class CCY extends Cryptocurrency {
-    intNum: number;
-    fractNum: number;
-    digits: number;
+    protected intNum: number;
+    protected fractNum: number;
+    protected digits: number;
 
-    constructor(crypto: object, num: number | string) {
+    constructor(crypto: ICrypto, num: number | string) {
         super(crypto);
         this.setValue(num)
     }
@@ -56,7 +60,7 @@ class CCY extends Cryptocurrency {
             }
             case 'fract': {
                 let parsedFractNum = this.getValue() - this.getIntNum() // .999 -> 0.999
-                return parsedFractNum * percent / 100
+                return Number((parsedFractNum * percent / 100).toFixed(2))
             }
         }
     }
@@ -81,12 +85,9 @@ class CCY extends Cryptocurrency {
     isEqually (value: number) : boolean {
         return this.getValue() === value
     }
-    // todo ChangeValues
-    changeValues (from: number, to: number ): void {
-        console.log(from, to)
-    }
-
-
+    // todo:
+    // реализовать прибавление \ отнятие
+    // инициализация задать число двумя отдельными параметрами
 }
 
 let testCrypto = {
