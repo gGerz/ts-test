@@ -24,9 +24,13 @@ class CCY extends Cryptocurrency {
     protected fractNum: number;
     protected digits: number;
 
-    constructor(crypto: ICrypto, num: number | string) {
+    constructor(crypto: ICrypto, num: number | string, advNum?: number | string) {
         super(crypto);
-        this.setValue(num)
+        if (num && advNum) {
+            this.setValue(`${num},${advNum}`)
+        } else {
+            this.setValue(num)
+        }
     }
     getValue () : number {
         return Number(`${this.intNum}.${this.fractNum}`)
@@ -41,7 +45,7 @@ class CCY extends Cryptocurrency {
         return this.digits
     }
     getBalance () : string {
-        return `${this.intNum}.${this.fractNum} ${this.getCode()}`
+        return `${this.intNum}${this.fractNum ? '.' + this.fractNum: ''} ${this.getCode()}`
     }
     getPercent (percent: number, setting: string = 'full' ) : number {
         switch (setting) {
@@ -53,15 +57,15 @@ class CCY extends Cryptocurrency {
             }
             case 'fract': {
                 let parsedFractNum = this.getValue() - this.getIntNum() // .999 -> 0.999
-                return Number((parsedFractNum * percent / 100).toFixed(2))
+                return Number((parsedFractNum * percent / 100).toFixed(this.getDigits()))
             }
         }
     }
     setValue (num: number | string) : void {
         let separator = typeof num === 'number' ? '.' : ','
         this.intNum = parseInt((num.toString().split(separator)[0]))
-        this.fractNum = parseInt((num.toString().split(separator)[1]))
-        this.digits = (num.toString().split(separator)[1]).length
+        this.fractNum = (num.toString().split(separator)[1]) ? parseInt((num.toString().split(separator)[1])) : 0
+        this.digits = (num.toString().split(separator)[1]) ? (num.toString().split(separator)[1]).length : 0
     }
     plusValue (value: number) : number {
         let oldValue = this.getValue()
@@ -107,6 +111,14 @@ class CCY extends Cryptocurrency {
         this.setValue(newValue)
         return newValue
     }
+    changeValue (value: number | string, advValue?: number | string) : number {
+        if (value && advValue) {
+            this.setValue(`${value},${advValue}`)
+        } else {
+            this.setValue(value)
+        }
+        return this.getValue()
+    }
     isMoreThen(value: number) : boolean {
         return this.getValue() > value
     }
@@ -116,10 +128,6 @@ class CCY extends Cryptocurrency {
     isEqually (value: number) : boolean {
         return this.getValue() === value
     }
-    // todo:
-    // реализовать прибавление \ отнятие
-    // реализовать замена числа
-    // инициализация задать число двумя отдельными параметрами
 }
 
 
@@ -128,12 +136,15 @@ let testCrypto = {
     code: 'PLZM'
 }
 
-const tmp = new CCY(testCrypto, 150.346)
+const tmp = new CCY(testCrypto, 150, 3)
 console.log(tmp.getValue())
-console.log(tmp.getPercent(10, 'fract'))
-console.log(tmp.plusPercentValue(10, 'fract'))
 
-// Вопросы:
+const tmp2 = new CCY(testCrypto, '155', 65)
+console.log(tmp2.getValue())
+tmp2.changeValue(5, 6)
+console.log(tmp2.getValue())
+
+// Вопрос:
 // 1) Норм практика возвращать во всех методах 'this',
 // чтобы можно было писать такие схемы как tmp.getValue().plusPercent(3).minusPercent(1)
 // и тд ?
